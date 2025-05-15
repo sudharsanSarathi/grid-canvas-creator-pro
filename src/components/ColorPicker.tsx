@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { ColorPicker } from 'lucide-react';
+import { Palette } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 
 interface ColorPickerProps {
@@ -44,7 +44,7 @@ const CustomColorPicker: React.FC<ColorPickerProps> = ({ color, onChange }) => {
             className="w-4 h-4 rounded-full border border-gray-300" 
             style={{ backgroundColor: color }}
           />
-          <ColorPicker className="h-4 w-4" />
+          <Palette className="h-4 w-4" />
           <span className="text-sm">Background</span>
         </Button>
       </PopoverTrigger>
