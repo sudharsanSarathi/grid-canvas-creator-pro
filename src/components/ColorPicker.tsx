@@ -3,6 +3,8 @@ import { useState } from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Palette } from 'lucide-react';
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface ColorPickerProps {
   color: string;
@@ -23,13 +25,37 @@ const presetColors = [
 
 const CustomColorPicker: React.FC<ColorPickerProps> = ({ color, onChange }) => {
   const [open, setOpen] = useState(false);
+  const [hexValue, setHexValue] = useState(color);
 
   const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onChange(e.target.value);
+    const newColor = e.target.value;
+    onChange(newColor);
+    setHexValue(newColor);
+  };
+
+  const handleHexInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setHexValue(value);
+    
+    // Only update the actual color if it's a valid hex code
+    if (/^#([0-9A-F]{3}){1,2}$/i.test(value)) {
+      onChange(value);
+    }
+  };
+
+  const handleHexInputBlur = () => {
+    // Ensure we have a valid hex on blur, otherwise revert to current color
+    if (!/^#([0-9A-F]{3}){1,2}$/i.test(hexValue)) {
+      setHexValue(color);
+    } else {
+      // Make sure to update the color if valid
+      onChange(hexValue);
+    }
   };
 
   const handlePresetClick = (preset: string) => {
     onChange(preset);
+    setHexValue(preset);
   };
 
   return (
@@ -51,9 +77,9 @@ const CustomColorPicker: React.FC<ColorPickerProps> = ({ color, onChange }) => {
       <PopoverContent className="w-64">
         <div className="space-y-4">
           <div className="space-y-2">
-            <label htmlFor="color-picker" className="text-sm font-medium">
-              Custom Color
-            </label>
+            <Label htmlFor="color-picker" className="text-sm font-medium">
+              Color Picker
+            </Label>
             <input
               id="color-picker"
               type="color"
@@ -64,7 +90,22 @@ const CustomColorPicker: React.FC<ColorPickerProps> = ({ color, onChange }) => {
           </div>
           
           <div className="space-y-2">
-            <label className="text-sm font-medium">Presets</label>
+            <Label htmlFor="hex-input" className="text-sm font-medium">
+              Hex Value
+            </Label>
+            <Input
+              id="hex-input"
+              type="text"
+              value={hexValue}
+              onChange={handleHexInputChange}
+              onBlur={handleHexInputBlur}
+              placeholder="#FFFFFF"
+              className="font-mono"
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">Presets</Label>
             <div className="grid grid-cols-5 gap-2">
               {presetColors.map((preset) => (
                 <button

@@ -30,7 +30,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
   };
 
   return (
-    <div className="flex flex-wrap items-center justify-center gap-4 mb-8">
+    <div className="flex flex-wrap items-center justify-center gap-4 mb-6">
       <div className="flex items-center">
         <CustomColorPicker color={backgroundColor} onChange={onBackgroundColorChange} />
       </div>

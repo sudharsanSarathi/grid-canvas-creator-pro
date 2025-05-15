@@ -74,21 +74,22 @@ const GridEditor: React.FC<GridEditorProps> = ({ backgroundColor }) => {
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div 
-        className={`upload-area border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+        className={`upload-area border-2 border-dashed rounded-lg p-4 text-center transition-colors ${
           isDragging ? 'border-primary bg-primary/5' : 'border-gray-300'
         }`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
       >
-        <div className="flex flex-col items-center justify-center py-6">
-          <Upload className="w-12 h-12 text-muted-foreground mb-4" />
-          <h3 className="text-lg font-medium mb-2">Drag and drop your images here</h3>
-          <p className="text-muted-foreground mb-4">or click to browse your files</p>
-          <p className="text-sm text-muted-foreground mb-4">Add as many images as possible to make your grid look more interesting!</p>
+        <div className="flex flex-col items-center justify-center py-3">
+          <Upload className="w-8 h-8 text-muted-foreground mb-2" />
+          <h3 className="text-base font-medium mb-1">Drag images here or click to browse</h3>
+          <p className="text-sm text-muted-foreground mb-2">Add as many images as possible to make your grid look more interesting!</p>
           <Button
             variant="outline"
+            size="sm"
             onClick={() => document.getElementById('image-upload')?.click()}
+            className="mt-1"
           >
             <Image className="mr-2 h-4 w-4" /> Upload Images
           </Button>
