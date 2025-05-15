@@ -1,68 +1,137 @@
 
 import { useState } from 'react';
-import GridCell from './GridCell';
+import { toast } from 'sonner';
+import { X, Upload, Image } from 'lucide-react';
+import { Button } from "@/components/ui/button";
 
 interface GridEditorProps {
-  gridType: '2x2' | '3x3';
   backgroundColor: string;
 }
 
-interface GridCellData {
+interface UploadedImage {
   id: string;
-  image: string | null;
+  url: string;
+  file: File;
 }
 
-const GridEditor: React.FC<GridEditorProps> = ({ gridType, backgroundColor }) => {
-  const cellCount = gridType === '2x2' ? 4 : 9;
-  
-  const [gridData, setGridData] = useState<GridCellData[]>(
-    Array.from({ length: cellCount }, (_, index) => ({
-      id: `cell-${index}`,
-      image: null,
-    }))
-  );
+const GridEditor: React.FC<GridEditorProps> = ({ backgroundColor }) => {
+  const [images, setImages] = useState<UploadedImage[]>([]);
+  const [isDragging, setIsDragging] = useState(false);
 
-  const handleImageChange = (index: number, file: File | null) => {
-    const newGridData = [...gridData];
-    
-    if (file === null) {
-      newGridData[index] = { ...newGridData[index], image: null };
-    } else {
-      const imageUrl = URL.createObjectURL(file);
-      newGridData[index] = { ...newGridData[index], image: imageUrl };
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      addNewImages(Array.from(e.target.files));
     }
-    
-    setGridData(newGridData);
   };
 
-  // If grid type changes, adjust the grid cells
-  if (gridData.length !== cellCount) {
-    if (gridData.length < cellCount) {
-      // Add new cells
-      const newCells = Array.from({ length: cellCount - gridData.length }, (_, index) => ({
-        id: `cell-${gridData.length + index}`,
-        image: null,
-      }));
-      setGridData([...gridData, ...newCells]);
+  const addNewImages = (files: File[]) => {
+    const newImages = files.map(file => ({
+      id: `img-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+      url: URL.createObjectURL(file),
+      file
+    }));
+    
+    setImages(prev => [...prev, ...newImages]);
+    
+    if (files.length === 1) {
+      toast.success('Image uploaded successfully!');
     } else {
-      // Remove excess cells
-      setGridData(gridData.slice(0, cellCount));
+      toast.success(`${files.length} images uploaded successfully!`);
     }
-  }
+  };
+
+  const removeImage = (id: string) => {
+    setImages(prev => {
+      const filtered = prev.filter(img => img.id !== id);
+      const removed = prev.find(img => img.id === id);
+      if (removed) {
+        URL.revokeObjectURL(removed.url);
+      }
+      return filtered;
+    });
+    toast.success('Image removed');
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(false);
+    
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      addNewImages(Array.from(e.dataTransfer.files));
+    }
+  };
 
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className="max-w-4xl mx-auto space-y-6">
       <div 
-        className={`grid-container grid-${gridType} w-full aspect-square rounded-lg overflow-hidden shadow-md`} 
-        style={{ backgroundColor }}
+        className={`upload-area border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+          isDragging ? 'border-primary bg-primary/5' : 'border-gray-300'
+        }`}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
       >
-        {gridData.map((cell, index) => (
-          <GridCell
-            key={cell.id}
-            image={cell.image}
-            onImageChange={(file) => handleImageChange(index, file)}
+        <div className="flex flex-col items-center justify-center py-6">
+          <Upload className="w-12 h-12 text-muted-foreground mb-4" />
+          <h3 className="text-lg font-medium mb-2">Drag and drop your images here</h3>
+          <p className="text-muted-foreground mb-4">or click to browse your files</p>
+          <p className="text-sm text-muted-foreground mb-4">Add as many images as possible to make your grid look more interesting!</p>
+          <Button
+            variant="outline"
+            onClick={() => document.getElementById('image-upload')?.click()}
+          >
+            <Image className="mr-2 h-4 w-4" /> Upload Images
+          </Button>
+          <input
+            id="image-upload"
+            type="file"
+            multiple
+            accept="image/*,image/gif"
+            onChange={handleFileChange}
+            className="hidden"
           />
-        ))}
+        </div>
+      </div>
+
+      {images.length > 0 && (
+        <div>
+          <h3 className="text-lg font-medium mb-4">Uploaded Images ({images.length})</h3>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {images.map((image) => (
+              <div key={image.id} className="relative group">
+                <img 
+                  src={image.url} 
+                  alt="Uploaded image" 
+                  className="w-full h-24 object-cover rounded-md"
+                />
+                <button
+                  className="absolute top-1 right-1 bg-black/70 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                  onClick={() => removeImage(image.id)}
+                  aria-label="Remove image"
+                >
+                  <X className="h-4 w-4 text-white" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className="grid-placeholder mt-12 p-8 border-2 border-dashed border-gray-300 rounded-lg" style={{ backgroundColor }}>
+        <div className="text-center py-20">
+          <h3 className="text-xl font-medium mb-2">Grid Placeholder</h3>
+          <p className="text-muted-foreground">Your grid will appear here</p>
+        </div>
       </div>
     </div>
   );

@@ -5,20 +5,6 @@
   text-align: center;
 }
 
-.grid-container {
-  display: grid;
-  gap: 0.5rem;
-  transition: all 0.3s ease;
-}
-
-.grid-2x2 {
-  grid-template-columns: repeat(2, 1fr);
-}
-
-.grid-3x3 {
-  grid-template-columns: repeat(3, 1fr);
-}
-
 .tool-bar {
   display: flex;
   justify-content: center;
@@ -66,4 +52,18 @@
 
 .fade-in {
   animation: fadeIn 0.3s ease-out forwards;
+}
+
+.upload-area {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.upload-area:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+.grid-placeholder {
+  transition: background-color 0.3s ease;
+  min-height: 400px;
 }

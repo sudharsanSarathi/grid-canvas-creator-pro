@@ -7,12 +7,11 @@ import Footer from '@/components/Footer';
 import { Toaster } from 'sonner';
 
 const Index = () => {
-  const [gridType, setGridType] = useState<'2x2' | '3x3'>('2x2');
   const [backgroundColor, setBackgroundColor] = useState('#FFFFFF');
 
   const generateIframeCode = () => {
     // This would generate actual iframe code in a real app
-    const code = `<iframe src="https://gridforge.app/embed/${gridType}?bg=${encodeURIComponent(backgroundColor)}" width="100%" height="500" frameborder="0"></iframe>`;
+    const code = `<iframe src="https://gridforge.app/embed?bg=${encodeURIComponent(backgroundColor)}" width="100%" height="500" frameborder="0"></iframe>`;
     return code;
   };
 
@@ -29,17 +28,12 @@ const Index = () => {
           </p>
           
           <ControlPanel 
-            gridType={gridType}
-            onGridChange={setGridType}
             backgroundColor={backgroundColor}
             onBackgroundColorChange={setBackgroundColor}
             onGenerateIframe={generateIframeCode}
           />
           
-          <GridEditor 
-            gridType={gridType} 
-            backgroundColor={backgroundColor} 
-          />
+          <GridEditor backgroundColor={backgroundColor} />
         </div>
       </main>
       
