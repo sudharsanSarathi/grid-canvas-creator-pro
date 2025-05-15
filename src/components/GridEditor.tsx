@@ -109,11 +109,11 @@ const GridEditor: React.FC<GridEditorProps> = ({ backgroundColor }) => {
           <h3 className="text-lg font-medium mb-4">Uploaded Images ({images.length})</h3>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {images.map((image) => (
-              <div key={image.id} className="relative group">
+              <div key={image.id} className="relative group aspect-square">
                 <img 
                   src={image.url} 
                   alt="Uploaded image" 
-                  className="w-full h-24 object-cover rounded-md"
+                  className="w-full h-full object-cover rounded-md"
                 />
                 <button
                   className="absolute top-1 right-1 bg-black/70 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"

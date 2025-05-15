@@ -5,6 +5,7 @@ import { Palette } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 
 interface ColorPickerProps {
   color: string;
@@ -23,9 +24,23 @@ const presetColors = [
   '#F7F7F7', // Almost white
 ];
 
+// Additional colors for the interactive color wheel
+const hueColors = [
+  '#FF0000', // Red
+  '#FF7F00', // Orange
+  '#FFFF00', // Yellow
+  '#00FF00', // Green
+  '#0000FF', // Blue
+  '#4B0082', // Indigo
+  '#9400D3', // Violet
+  '#FF00FF', // Magenta
+  '#FF1493', // Deep Pink
+];
+
 const CustomColorPicker: React.FC<ColorPickerProps> = ({ color, onChange }) => {
   const [open, setOpen] = useState(false);
   const [hexValue, setHexValue] = useState(color);
+  const [showColorWheel, setShowColorWheel] = useState(false);
 
   const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newColor = e.target.value;
@@ -56,6 +71,59 @@ const CustomColorPicker: React.FC<ColorPickerProps> = ({ color, onChange }) => {
   const handlePresetClick = (preset: string) => {
     onChange(preset);
     setHexValue(preset);
+  };
+
+  const handleHueClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    // Get the position of the click relative to the color wheel
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    // Calculate the center of the wheel
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    
+    // Calculate distance from center and angle
+    const dx = x - centerX;
+    const dy = y - centerY;
+    const radius = Math.min(centerX, centerY);
+    
+    // Convert to polar coordinates
+    const distance = Math.sqrt(dx * dx + dy * dy) / radius;
+    const angle = Math.atan2(dy, dx) / Math.PI * 180;
+    
+    // Convert angle to hue (0-360)
+    const hue = (angle + 360) % 360;
+    
+    // Calculate saturation (0-100) based on distance from center
+    const saturation = Math.min(100, distance * 100);
+    
+    // Fixed lightness (50%)
+    const lightness = 50;
+    
+    // Convert HSL to hex
+    const hslColor = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+    
+    // Create a temporary div to get the computed RGB value
+    const tempDiv = document.createElement('div');
+    tempDiv.style.color = hslColor;
+    document.body.appendChild(tempDiv);
+    
+    // Get the computed RGB value
+    const rgbColor = window.getComputedStyle(tempDiv).color;
+    document.body.removeChild(tempDiv);
+    
+    // Convert RGB to hex
+    const rgbMatch = rgbColor.match(/\d+/g);
+    if (rgbMatch) {
+      const hex = '#' + rgbMatch.map(value => {
+        const hexVal = parseInt(value).toString(16);
+        return hexVal.length === 1 ? '0' + hexVal : hexVal;
+      }).join('');
+      
+      onChange(hex);
+      setHexValue(hex);
+    }
   };
 
   return (
@@ -102,6 +170,27 @@ const CustomColorPicker: React.FC<ColorPickerProps> = ({ color, onChange }) => {
               placeholder="#FFFFFF"
               className="font-mono"
             />
+          </div>
+          
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">Interactive Color Wheel</Label>
+            <div className="relative w-full">
+              <AspectRatio ratio={1/1} className="overflow-hidden">
+                <div 
+                  className="w-full h-full rounded-full bg-white cursor-crosshair border border-gray-300 relative"
+                  style={{
+                    backgroundImage: `conic-gradient(red, yellow, lime, aqua, blue, magenta, red)`
+                  }}
+                  onClick={handleHueClick}
+                />
+                <div 
+                  className="absolute inset-[15%] rounded-full bg-white cursor-crosshair"
+                  style={{
+                    backgroundImage: `radial-gradient(circle, white, transparent)`
+                  }}
+                />
+              </AspectRatio>
+            </div>
           </div>
           
           <div className="space-y-2">
